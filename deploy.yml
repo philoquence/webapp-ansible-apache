@@ -2,8 +2,14 @@
   hosts: prod
   become: true
   pre_tasks:
-    - name: Install EPEL repo
-      package: name=epel-release state=present
+    - name: Install EPEL GIT and WGET
+      yum: 
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - epel-release      
+        - wget
+        - git
       when: ansible_distribution == "CentOS"
     - name: download pip script
       get_url:
@@ -14,9 +20,15 @@
     - name: Install docker python
       pip: name=docker-py
   tasks:
+    - name: Custom site
+      template:
+        src: index.html.j2
+        dest: /tmp/index.html
     - name: Create Apache container
       docker_container:
         name: webapp
         image: httpd
         ports:
           - "80:80"
+        volumes:
+          - /tmp/index.html:/usr/local/apache2/htdocs/index.html
