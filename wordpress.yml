@@ -1,0 +1,13 @@
+---
+- hosts: prod
+  become: true
+  vars:
+    system_user: admin
+  vars_files:
+    - files/secrets/credentials.vault
+  pre_tasks:
+    - name: Create www-data
+      user: name=www-data state=present
+  roles:
+#    - { role: ansible-role-docker-compose-setup } 
+    - { role: ansible-role-containerized-wordpress }
