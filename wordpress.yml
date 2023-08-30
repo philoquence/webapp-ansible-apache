@@ -6,6 +6,29 @@
   vars_files:
     - files/secrets/credentials.vault
   pre_tasks:
+    - name: Install EPEL GIT and WGET
+      yum: 
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - epel-release      
+        - wget
+        - git
+      when: ansible_distribution == "CentOS"
+    - name: download pip script
+      get_url:
+        url: https://bootstrap.pypa.io/pip/2.7/get-pip.py
+        dest: /tmp/get-pip.py
+    - name: Install docker-compose
+      remote_user: ubuntu
+      get_url: 
+        url : https://github.com/docker/compose/releases/download/1.25.1-rc1/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: 'u+x,g+x'
+    - name: install python-pip
+      command: python2.7 /tmp/get-pip.py
+    - name: Install docker python
+      pip: name=docker-py
     - name: Create www-data
       user: name=www-data state=present
   roles:
